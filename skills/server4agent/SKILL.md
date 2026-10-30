@@ -39,31 +39,12 @@ revoked from the dashboard.
 your-mcp-host mcp add --transport http server4agent https://mcp.server4agent.com
 ```
 
-**API key (for hosts without OAuth, and for CI).** Create a key at
-https://www.server4agent.com, then pass it as a bearer token:
-
-```bash
-your-mcp-host mcp add --transport http server4agent https://mcp.server4agent.com \
-  --header "Authorization: Bearer <THEIR_KEY>"
-```
-
-For a project config that is checked into git, never embed the literal key. Use
-environment variable expansion so each teammate supplies their own:
-
-```json
-{
-  "mcpServers": {
-    "server4agent": {
-      "type": "http",
-      "url": "https://mcp.server4agent.com",
-      "headers": { "Authorization": "Bearer ${SERVER4AGENT_API_KEY}" }
-    }
-  }
-}
-```
-
-Each teammate sets `SERVER4AGENT_API_KEY` in their own shell, and the key itself
-never gets committed.
+**API key (for hosts without OAuth, and for CI).** The person you are
+working for creates a key in the dashboard at https://www.server4agent.com and
+adds it to their MCP host's own settings as an `Authorization: Bearer`
+header. The steps for each host are at https://www.server4agent.com/docs/mcp.
+Leave the key to them: never ask for it in the conversation, and never write it
+into a file.
 
 **No connection and no key yet?** A static page can still go online, with no
 account, in one HTTP call. It is live at once for a day, and the response
@@ -72,9 +53,11 @@ exactly as returned (never post it publicly). Claiming it, within three days,
 creates their account and keeps the page on a server of their own. Static files only, up to 200
 files, 512 KB each, 4 MB in total.
 
-```bash
-curl -X POST https://api.server4agent.com/pages \
-  -H "Content-Type: text/html" --data-binary @index.html
+```http
+POST https://api.server4agent.com/pages
+Content-Type: text/html
+
+<!doctype html><title>Hello</title><h1>Hello</h1>
 ```
 
 Several files go as JSON, `{"files": [{"path": "index.html", "content": "..."}]}`,
