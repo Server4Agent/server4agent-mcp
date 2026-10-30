@@ -70,6 +70,21 @@ supports OAuth opens a browser to sign in and needs nothing else. For a host wit
 send an API key as `Authorization: Bearer <key>`, and keep the key in an
 environment variable rather than in a config file you commit.
 
+### As a plugin or a skill
+
+This repository is also a plugin: the skill plus this server, in one install.
+In a host that reads plugin marketplaces:
+
+```
+/plugin install server4agent --marketplace Server4Agent/server4agent-mcp
+```
+
+For the skill alone, in any agent that reads Agent Skills:
+
+```bash
+npx skills add Server4Agent/server4agent-mcp --skill server4agent
+```
+
 Setup for more apps: https://www.server4agent.com/integrations
 
 ## Use it

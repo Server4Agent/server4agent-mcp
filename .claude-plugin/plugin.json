@@ -1,0 +1,25 @@
+{
+  "name": "server4agent",
+  "displayName": "Server4Agent",
+  "description": "Servers your AI assistant builds on. It writes the code, runs it and ships each app to a live URL.",
+  "author": {
+    "name": "Server4Agent",
+    "url": "https://www.server4agent.com"
+  },
+  "homepage": "https://www.server4agent.com/docs/mcp",
+  "repository": "https://github.com/Server4Agent/server4agent-mcp",
+  "keywords": [
+    "hosting",
+    "deploy",
+    "mcp",
+    "server",
+    "websites",
+    "bots",
+    "automation"
+  ],
+  "icon": "./icon.png",
+  "documentationUrl": "https://www.server4agent.com/docs/mcp",
+  "supportUrl": "https://www.server4agent.com/contact",
+  "privacyPolicyUrl": "https://www.server4agent.com/privacy",
+  "termsOfServiceUrl": "https://www.server4agent.com/terms"
+}

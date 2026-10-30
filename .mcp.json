@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "server4agent": {
+      "type": "http",
+      "url": "https://mcp.server4agent.com"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "server4agent",
+  "description": "Servers your AI assistant builds on. It writes the code, runs it and ships each app to a live URL.",
+  "owner": {
+    "name": "Server4Agent",
+    "url": "https://www.server4agent.com"
+  },
+  "plugins": [
+    {
+      "name": "server4agent",
+      "source": "./",
+      "description": "Servers your AI assistant builds on. It writes the code, runs it and ships each app to a live URL."
+    }
+  ]
+}
