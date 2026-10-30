@@ -46,29 +46,13 @@ Start the server and VS Code opens a browser to sign in. There is no key to
 copy, and you can revoke the sign-in from the dashboard. The tools are then
 available to Copilot Chat in agent mode.
 
-### GitHub Copilot CLI
+### GitHub Copilot CLI and other hosts
 
-Create an API key in the dashboard, export it as `SERVER4AGENT_API_KEY`, and
-add the server to `~/.copilot/mcp-config.json`:
-
-```json
-{
-  "mcpServers": {
-    "server4agent": {
-      "type": "http",
-      "url": "https://mcp.server4agent.com",
-      "headers": { "Authorization": "Bearer ${SERVER4AGENT_API_KEY}" }
-    }
-  }
-}
-```
-
-### Any other MCP host
-
-Add `https://mcp.server4agent.com` as a remote MCP server. A host that
-supports OAuth opens a browser to sign in and needs nothing else. For a host without OAuth, or for CI,
-send an API key as `Authorization: Bearer <key>`, and keep the key in an
-environment variable rather than in a config file you commit.
+Add `https://mcp.server4agent.com` as a remote MCP server. A host that supports OAuth opens a
+browser to sign in and needs nothing else. A host without OAuth, the Copilot
+CLI among them, takes an API key from the dashboard, which you add in that
+host's own settings as an `Authorization: Bearer` header. Steps for each
+app: https://www.server4agent.com/integrations
 
 ### As a plugin or a skill
 
