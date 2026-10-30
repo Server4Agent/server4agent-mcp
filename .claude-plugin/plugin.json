@@ -8,6 +8,7 @@
   },
   "homepage": "https://www.server4agent.com/docs/mcp",
   "repository": "https://github.com/Server4Agent/server4agent-mcp",
+  "license": "MIT",
   "keywords": [
     "hosting",
     "deploy",
