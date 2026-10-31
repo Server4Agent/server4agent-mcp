@@ -95,7 +95,7 @@ How it fits together:
 
 ## Tools
 
-38 tools. `[read-only]` never writes; `[destructive]` may delete or
+34 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite.
 
 ### Servers
@@ -119,7 +119,7 @@ A project is a workspace plus an app inside a server, with its own slug and URL.
 - `list_projects` `[read-only]`: List projects.
 - `get_project` `[read-only]`: Get a single project: name, slug, description, public URL, listen port, run plan, timestamps.
 - `update_project` `[destructive]`: Rename a project, update its description, change visibility, link access or lifecycle, or correct its run plan.
-- `init_project`: Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds.
+- `init_project` `[destructive]`: Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds.
 - `export_project`: Package a project into a portable bundle and return a time-limited download link.
 - `import_project`: Recreate a project on a server from a bundle that export_project produced, here or on another Server4Agent deployment.
 - `cleanup_project` `[destructive]`: Clean up an ephemeral project once its task is done.
@@ -139,7 +139,7 @@ Env vars for servers and projects. Values are write-only: no tool ever reads one
 Start and keep your app running, drive the shell yourself, or, when the user asks for it, hand work to the agent running on the server.
 
 - `start_app` `[destructive]`: Start a project's app and keep it running: the step that puts a project online after its files are written.
-- `prompt`: Send a freeform prompt to the on-server agent.
+- `prompt` `[destructive]`: Send a freeform prompt to the on-server agent.
 - `exec` `[destructive]`: Run a shell command on the server and return its output.
 - `get_run` `[read-only]`: Get a run's status, its latest progress note, the agent's final response, and what it changed in the workspace (commit, branch, files).
 - `get_logs` `[read-only]`: Read the latest log tails from a server: one entry per log file that a project's processes have written (each long-running process appends to .server4agent/&lt;name&gt;.log in its project folder).
@@ -158,18 +158,9 @@ Read and write the project's files directly when you do not need the agent.
 
 Put a running project online with deploy, or, when the user asks for one, start an agent run that builds from a goal.
 
-- `start_build`: Have the on-server agent build a web page, site, app or API from a plain-language goal.
+- `start_build` `[destructive]`: Have the on-server agent build a web page, site, app or API from a plain-language goal.
 - `get_build` `[read-only]`: Get a build's status.
 - `deploy`: Deploy a project to its live public URL at &lt;slug&gt;.apps.server4agent.com: the last step in putting a web page, site, app or API online.
-
-### Self-tuning
-
-Feed an evaluation report back into the agent's own code so it can fix what the report found.
-
-- `start_tuning`: Fix an agent from an evaluation platform's report.
-- `get_tuning_session`: Get a tuning run's status and the agent run behind it.
-- `list_tuning_sessions` `[read-only]`: List tuning runs on this account, newest first.
-- `report_tuning_result`: Tell the evaluation platform what a tuning run changed, and where the fixed build is reachable.
 
 Every tool's arguments, with worked examples, are in the Agent Skill at
 https://www.server4agent.com/skill.md, and in each tool's JSON schema once you

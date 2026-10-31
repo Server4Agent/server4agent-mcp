@@ -55,7 +55,7 @@ needs the connection above. Reference: https://www.server4agent.com/docs/pages
 
 ## Tools
 
-38 tools. `[read-only]` never writes; `[destructive]` may delete or
+34 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite, so confirm with the user before calling one.
 
 ### Servers
@@ -91,7 +91,7 @@ A project is a workspace plus an app inside a server, with its own slug and URL.
   Get a single project: name, slug, description, public URL, listen port, run plan, timestamps. listen_port is the port inside the box that this project's URL is routed to, so an app here binds that rather than a port of its own choosing, and has to be running for the URL to answer. listen_port is null on a project created before the field existed, and on a box old enough to predate the in-pod proxy the published port (8080) is reached directly instead, so treat those two as the fallback when an app that binds listen_port still cannot be reached. url_status covers only whether the address and its certificate are ready, so it reads "active" for a public project with nothing listening; it is not a health check. run_plan is how bring-up installs and starts it, or null if no plan has been settled yet; a run_plan whose port is null means the project isn't a server.
 - `update_project(project_id, name?, description?, visibility?, access?, access_password?, lifecycle?, run_plan?)` `[destructive]`
   Rename a project, update its description, change visibility, link access or lifecycle, or correct its run plan. The slug + URL stay the same. Setting run_plan only records how the project should be brought up; call init_project when you want it rebuilt.
-- `init_project(project_id, proceed?)`
+- `init_project(project_id, proceed?)` `[destructive]`
   Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds. Returns a run_id to poll with get_run. Set proceed to true to continue past still-missing optional secrets. Not for a project whose files you wrote yourself: start that one with start_app.
 - `export_project(project_id, ttl_seconds?)`
   Package a project into a portable bundle and return a time-limited download link. The bundle carries the project's source tree, its settings, its run plan, and the NAMES of the env vars it needs. Left out: dependency caches, git history, and any .env or credential file in the workspace, so the bundle never carries a secret value. Hand the file to import_project on this deployment or any other Server4Agent deployment to recreate the project there.
@@ -121,7 +121,7 @@ Start and keep your app running, drive the shell yourself, or, when the user ask
 
 - `start_app(project_id, command, name?)` `[destructive]`
   Start a project's app and keep it running: the step that puts a project online after its files are written. Runs `command` in the project folder as a background process with PORT set to the project's routed port (the app must listen on PORT), records it so it comes back after a restart, and waits up to about 10 seconds for the port to answer. Calling it again with the same name restarts it, which is how you pick up changed code. Returns whether the app is answering, its log tail, and the URL. A project's URL serves only while its visibility is public, so set that with update_project when the app should be reachable. For static files, put them under public/ and serve that folder, e.g. "python3 -m http.server $PORT --bind 0.0.0.0 --directory public". Never serve the project folder itself, which holds the project's secrets in .server4agent/env.
-- `prompt(server_id, prompt, project_id?, follow_up_of?)`
+- `prompt(server_id, prompt, project_id?, follow_up_of?)` `[destructive]`
   Send a freeform prompt to the on-server agent. It plans, writes code, runs commands, and ships whatever the prompt asks for. It spends the account's AI budget, so use it when the user asks for the on-server agent or to continue a run it started; to build something yourself, write_file, exec, start_app and deploy cost nothing. Returns a run_id to poll with get_run. Each call starts a new conversation unless you pass follow_up_of: the run_id of an earlier run to continue, so the agent remembers what it did there. Use it to answer a run that is awaiting_input, or to ask for changes to what a run built. Pass project_id to work inside one project's workspace, or omit it to work across the whole server workspace (e.g. scaffolding a new project).
 - `exec(server_id, command, project_id?)` `[destructive]`
   Run a shell command on the server and return its output. Pass project_id to run inside that project's workspace folder, with PORT set to the project's routed port; omit it to run at the server workspace root. For one-off work: installing dependencies, building, inspecting files. Runs as the workspace user, the same one the agent and the apps run as, so what it creates stays editable by both; prefix a command with sudo when it needs root. A project command also gets the project's secrets as env. The command's session ends with the call, so do not use it to start an app or any other long-running process: use start_app, which keeps it running, brings it back after a restart, and tells you whether it answered. Output comes back for about 20 seconds: a command that runs longer keeps going on the server, but its output does not return, and the server's other commands wait for it. Start long work (a big install, a long build) in the background with its output in a file, then read the file.
@@ -149,25 +149,12 @@ Read and write the project's files directly when you do not need the agent.
 
 Put a running project online with deploy, or, when the user asks for one, start an agent run that builds from a goal.
 
-- `start_build(server_id, goal, project_id?)`
+- `start_build(server_id, goal, project_id?)` `[destructive]`
   Have the on-server agent build a web page, site, app or API from a plain-language goal. Use it only when the user asks for that agent: it counts against the AI budget like prompt, and you can write the code yourself with write_file, exec and start_app, then deploy. Starts an agent run that works through each stage in order: plan, scaffold, write the code, install, build and test, then start it on the project's port. Returns a build_id to poll with get_build, and the run_id of the run doing the work. Pass project_id to build inside that project's workspace folder, then deploy it to put the result online; omit project_id to build at the server workspace root.
 - `get_build(server_id, build_id)` `[read-only]`
   Get a build's status. The steps move together: running while the run works, done when it finished, failed when it did not (status still reads completed, and error says why). url is the project's address once it is built and public. run_id is the run doing the work: get_run shows its live progress, and when run_status is awaiting_input, answer its question with prompt and follow_up_of set to that run_id.
 - `deploy(server_id, project_id?)`
   Deploy a project to its live public URL at <slug>.apps.server4agent.com: the last step in putting a web page, site, app or API online. Checks that something in the project is listening on its `listen_port`, makes the project public, and checks its URL answers, then returns that URL with status live (or publishing, when it is public but has not answered yet). It builds and starts nothing: when nothing is listening it refuses and leaves the project as it was, so start the app first with start_app (after write_file, for code you write yourself), or have the on-server agent build and start it with start_build or prompt. Pass project_id; a server with exactly one project deploys that one without it.
-
-### Self-tuning
-
-Feed an evaluation report back into the agent's own code so it can fix what the report found.
-
-- `start_tuning(project_id?, server_id?, proposal_id, evaluation_api_base?, key_secret?)`
-  Fix an agent from an evaluation platform's report. Fetches the diagnosis for an improvement proposal (the failing test cases and why each answer was marked down), writes it into the project's workspace, and starts an agent run that fixes the cause, redeploys, and submits a fresh evaluation so the result can be compared against the original. Pass project_id when the agent's code is already a project here. Pass server_id instead when it is not: the agent's repository (or archive) is fetched from the evaluation platform and built into a new project on that server, and the fix starts once it is up. The platform names the environment variables the agent needs; their values come from this account's secrets, so set those first with set_secret. Requires a secret holding the evaluation API key (AGENTX_API_KEY unless you name another). Follow it with get_tuning_session.
-- `get_tuning_session(tuning_session_id)`
-  Get a tuning run's status and the agent run behind it. Reading is what advances it: the first read after the run finishes reports the outcome back to the evaluation platform. Poll this until status is reported or failed.
-- `list_tuning_sessions(project_id?, status?)` `[read-only]`
-  List tuning runs on this account, newest first. Optionally filter by project.
-- `report_tuning_result(tuning_session_id, change_summary?, changed_files?, deployment_url?, failed?)`
-  Tell the evaluation platform what a tuning run changed, and where the fixed build is reachable. Use this when you want the summary a reviewer reads next to the before-and-after scores to be your own account rather than whatever the run's final message happened to say.
 
 ## Common workflows
 
