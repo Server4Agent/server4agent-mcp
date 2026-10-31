@@ -272,5 +272,14 @@ tasks are blocked. Worth a call before a series of `prompt` invocations.
   poll `get_run` or `get_build` for progress.
 - Secret **values are write-only**. `list_secrets` returns keys, notes, and
   bindings, never a value.
+- **Email needs no provider key.** An app that should email the people on the
+  account (an alert, a report) can POST to the URL in its `S4A_EMAIL_URL` env
+  var, sending `S4A_EMAIL_TOKEN` as a bearer token, with a JSON body of
+  `subject`, `text` and, optionally, `to`. A project's `exec` commands and its
+  `start_app` apps get both variables, and `start_app` keeps them in
+  `.server4agent/env.sh` for a cron job to source. It reaches only the
+  account's own people at confirmed addresses (the owner when `to` is left
+  out), so there is nothing to ask the user for. Mail to anyone else needs
+  their own provider, set with `set_secret`.
 - Argument details beyond the signatures above are in each tool's own JSON
   schema, which your MCP host already has once connected.
