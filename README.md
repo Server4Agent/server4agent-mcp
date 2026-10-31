@@ -175,6 +175,32 @@ Every tool's arguments, with worked examples, are in the Agent Skill at
 https://www.server4agent.com/skill.md, and in each tool's JSON schema once you
 are connected.
 
+## Where your data goes
+
+Your assistant sends data to two Server4Agent endpoints, and to no other
+service:
+
+- **`https://mcp.server4agent.com`**, the MCP server this plugin connects. It receives every
+  tool call and its arguments: the files, commands, prompts and secret values
+  your assistant sends.
+- **`https://api.server4agent.com/pages`**, which the skill uses only when no connection is
+  set up, to publish a static page without an account. It receives that page's
+  files.
+
+The skill also links to pages on https://www.server4agent.com for reference. Nothing is sent there.
+
+How long it is kept:
+
+- Files, apps and secrets on a server stay until you delete them, or the server
+  they are on.
+- A page published without an account is public for a day and can be claimed
+  for three. If nobody claims it, its files are deleted after that.
+- Account data is kept while the account is open, and for up to 90 days after
+  it closes. Server logs are kept for 30 days.
+
+What happens to it on our side, including the services we use to run it, is in
+the privacy policy: https://www.server4agent.com/privacy
+
 ## Links
 
 - Website: https://www.server4agent.com
