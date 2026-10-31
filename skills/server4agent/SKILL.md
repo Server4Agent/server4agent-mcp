@@ -5,8 +5,9 @@ when_to_use: Triggers on requests like "make a page and put it online", "deploy 
 ---
 
 Use Server4Agent's MCP tools (the `server4agent` MCP server) to build and host
-web pages, sites and apps at a live URL, provision servers, manage projects, and
-delegate work to an agent that runs on the box.
+web pages, sites and apps at a live URL: provision servers, manage projects, and
+write and run the code on the box yourself. An agent that runs there can also
+build for you, when the user asks for it.
 
 ## One-time setup
 
@@ -116,12 +117,12 @@ Env vars for servers and projects. Values are write-only: no tool ever reads one
 
 ### Agent runtime
 
-Start and keep your app running, delegate work to the agent running on the server, or drive the shell yourself.
+Start and keep your app running, drive the shell yourself, or, when the user asks for it, hand work to the agent running on the server.
 
 - `start_app(project_id, command, name?)` `[destructive]`
   Start a project's app and keep it running: the step that puts a project online after its files are written. Runs `command` in the project folder as a background process with PORT set to the project's routed port (the app must listen on PORT), records it so it comes back after a restart, and waits up to about 10 seconds for the port to answer. Calling it again with the same name restarts it, which is how you pick up changed code. Returns whether the app is answering, its log tail, and the URL. A project's URL serves only while its visibility is public, so set that with update_project when the app should be reachable. For static files, put them under public/ and serve that folder, e.g. "python3 -m http.server $PORT --bind 0.0.0.0 --directory public". Never serve the project folder itself, which holds the project's secrets in .server4agent/env.
 - `prompt(server_id, prompt, project_id?, follow_up_of?)`
-  Send a freeform prompt to the on-server agent. It plans, writes code, runs commands, and ships whatever the prompt asks for. Returns a run_id to poll with get_run. Each call starts a new conversation unless you pass follow_up_of: the run_id of an earlier run to continue, so the agent remembers what it did there. Use it to answer a run that is awaiting_input, or to ask for changes to what a run built. Pass project_id to work inside one project's workspace, or omit it to work across the whole server workspace (e.g. scaffolding a new project).
+  Send a freeform prompt to the on-server agent. It plans, writes code, runs commands, and ships whatever the prompt asks for. It spends the account's AI budget, so use it when the user asks for the on-server agent or to continue a run it started; to build something yourself, write_file, exec, start_app and deploy cost nothing. Returns a run_id to poll with get_run. Each call starts a new conversation unless you pass follow_up_of: the run_id of an earlier run to continue, so the agent remembers what it did there. Use it to answer a run that is awaiting_input, or to ask for changes to what a run built. Pass project_id to work inside one project's workspace, or omit it to work across the whole server workspace (e.g. scaffolding a new project).
 - `exec(server_id, command, project_id?)` `[destructive]`
   Run a shell command on the server and return its output. Pass project_id to run inside that project's workspace folder, with PORT set to the project's routed port; omit it to run at the server workspace root. For one-off work: installing dependencies, building, inspecting files. Runs as the workspace user, the same one the agent and the apps run as, so what it creates stays editable by both; prefix a command with sudo when it needs root. A project command also gets the project's secrets as env. The command's session ends with the call, so do not use it to start an app or any other long-running process: use start_app, which keeps it running, brings it back after a restart, and tells you whether it answered. Output comes back for about 20 seconds: a command that runs longer keeps going on the server, but its output does not return, and the server's other commands wait for it. Start long work (a big install, a long build) in the background with its output in a file, then read the file.
 - `get_run(server_id, run_id)` `[read-only]`
@@ -146,10 +147,10 @@ Read and write the project's files directly when you do not need the agent.
 
 ### Build and deploy
 
-An agent run that builds from a goal, and deploy, which puts a running project online.
+Put a running project online with deploy, or, when the user asks for one, start an agent run that builds from a goal.
 
 - `start_build(server_id, goal, project_id?)`
-  Have the on-server agent build a web page, site, app or API from a plain-language goal. Counts against the AI budget like prompt, so for something you can write yourself, write_file and start_app leave that budget alone. Starts an agent run that works through each stage in order: plan, scaffold, write the code, install, build and test, then start it on the project's port. Returns a build_id to poll with get_build, and the run_id of the run doing the work. Pass project_id to build inside that project's workspace folder, then deploy it to put the result online; omit project_id to build at the server workspace root.
+  Have the on-server agent build a web page, site, app or API from a plain-language goal. Use it only when the user asks for that agent: it counts against the AI budget like prompt, and you can write the code yourself with write_file, exec and start_app, then deploy. Starts an agent run that works through each stage in order: plan, scaffold, write the code, install, build and test, then start it on the project's port. Returns a build_id to poll with get_build, and the run_id of the run doing the work. Pass project_id to build inside that project's workspace folder, then deploy it to put the result online; omit project_id to build at the server workspace root.
 - `get_build(server_id, build_id)` `[read-only]`
   Get a build's status. The steps move together: running while the run works, done when it finished, failed when it did not (status still reads completed, and error says why). url is the project's address once it is built and public. run_id is the run doing the work: get_run shows its live progress, and when run_status is awaiting_input, answer its question with prompt and follow_up_of set to that run_id.
 - `deploy(server_id, project_id?)`
@@ -170,33 +171,26 @@ Feed an evaluation report back into the agent's own code so it can fix what the 
 
 ## Common workflows
 
-**Provision and deploy a project**
+**Build and deploy a project: you write the code**
+This is the way to build anything, from one page to an API: you write the
+code, and these tools put it on the server and online. Nothing here serves a
+directory. A project's URL is routed to one port inside the box, so a page or a
+server is only live once a process is answering on that port.
+
 1. `list_servers` and reuse a running one with room for another project, or
    `create_server` when there is none. Either gives you a `server_id`. A new
    server takes about a minute to start: poll `get_server` until
    `provisioning` reads `ready` before writing files.
-2. `create_project(server_id, name, template?, visibility="public")` returns a
-   `project_id` and the `listen_port` that project's URL is routed to.
-3. `prompt(server_id, "Build ...", project_id)` and the on-server agent writes the
-   code, binds that port, and leaves the process running. To write the code
-   yourself instead, see the next workflow.
-4. `deploy(server_id, project_id)` once the run finishes. It checks the app is
-   listening, makes the project public if it is not, and returns the URL once
-   it answers.
-
-**Put an app you write yourself online**
-Nothing here serves a directory. A project's URL is routed to one port inside
-the box, so a page or a server is only live once a process is answering on
-that port. `start_app` is that step, and the only one you need for it:
-
-1. `create_project(server_id, name, visibility="public")` returns `project_id`
+2. `create_project(server_id, name, visibility="public")` returns `project_id`
    and `listen_port`.
-2. `write_file(server_id, "public/index.html", "<html>...", project_id)`, and
+3. `write_file(server_id, "public/index.html", "<html>...", project_id)`, and
    the same for each other file. Static pages go under `public/`: the
    project folder itself holds
    `.server4agent/env`, the secrets bound to this project, and a file server
    rooted at the project would publish them.
-3. `start_app(project_id, command)`. It runs the command in the background
+4. `exec` installs dependencies (`npm install`,
+   `pip install -r requirements.txt`) and waits for them.
+5. `start_app(project_id, command)`. It runs the command in the background
    with `PORT` set to the project's port, records it so the app comes back
    after a restart, and waits for the port to answer.
 
@@ -205,16 +199,23 @@ start_app  project_id, command: "node server.js"
 start_app  project_id, command: "python3 -m http.server $PORT --bind 0.0.0.0 --directory public"
 ```
 
-4. The result says whether the app is answering, with its log tail and the
+6. The result says whether the app is answering, with its log tail and the
    URL. If it exited, the log says why: fix that and call `start_app` again.
    Calling it again with the same `name` is also how a changed server picks
    up new code.
+7. `deploy(server_id, project_id)`. It checks the app is listening, makes the
+   project public if it is not, and returns the URL once it answers.
 
-Your app has to listen on `$PORT`, not a port of its own. Install
-dependencies first with `exec` (`npm install`), which waits for them.
-`prompt(server_id, "Build and serve ...", project_id)` is the other path: the
-on-server agent writes the code and starts it, for work you would rather not
-write yourself.
+Your app has to listen on `$PORT`, not a port of its own.
+
+**Hand a build to the on-server agent, when the user asks for it**
+An agent on the server can write and start the code instead. It spends the
+account's AI budget, so use it when the user asks for that agent, not as the
+way to build.
+1. `create_project` as above.
+2. `prompt(server_id, "Build and serve ...", project_id)`, or `start_build`
+   with the goal. Poll `get_run` or `get_build` until it finishes.
+3. `deploy(server_id, project_id)` once the run finishes.
 
 **Follow up on a run**
 Every `prompt` call starts a new conversation. To change what a run built, or
@@ -224,7 +225,7 @@ up that conversation in the same folder and project, so it knows what it did.
 
 **Ephemeral one-shot task**
 1. `create_project(server_id, name, lifecycle="ephemeral")`.
-2. `prompt` or `exec` to do the work.
+2. `exec` to do the work, or `prompt` when the user asks for the on-server agent.
 3. `cleanup_project(project_id)` frees the slot when done.
 
 **Check capacity before creating**

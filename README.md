@@ -87,9 +87,9 @@ How it fits together:
 - A **project** is a folder plus an app, with its own URL at
   `<slug>.apps.server4agent.com`. Projects are private until `deploy` makes
   them public.
-- Your assistant can write the files itself, or hand a goal to the agent that
-  runs on the server (`start_build`, `prompt`), which spends the account's
-  AI budget.
+- Your assistant writes the code and runs it on the server itself. The agent
+  that runs on the server (`start_build`, `prompt`) can build for you when
+  you ask for it, and spends the account's AI budget.
 - Tools that delete or overwrite are marked destructive, so your host can ask
   you before it runs one.
 
@@ -136,7 +136,7 @@ Env vars for servers and projects. Values are write-only: no tool ever reads one
 
 ### Agent runtime
 
-Start and keep your app running, delegate work to the agent running on the server, or drive the shell yourself.
+Start and keep your app running, drive the shell yourself, or, when the user asks for it, hand work to the agent running on the server.
 
 - `start_app` `[destructive]`: Start a project's app and keep it running: the step that puts a project online after its files are written.
 - `prompt`: Send a freeform prompt to the on-server agent.
@@ -156,7 +156,7 @@ Read and write the project's files directly when you do not need the agent.
 
 ### Build and deploy
 
-An agent run that builds from a goal, and deploy, which puts a running project online.
+Put a running project online with deploy, or, when the user asks for one, start an agent run that builds from a goal.
 
 - `start_build`: Have the on-server agent build a web page, site, app or API from a plain-language goal.
 - `get_build` `[read-only]`: Get a build's status.
