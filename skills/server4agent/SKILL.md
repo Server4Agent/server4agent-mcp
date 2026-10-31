@@ -4,18 +4,6 @@ description: Build and host web pages, sites, apps, APIs, bots and scheduled job
 when_to_use: Triggers on requests like "make a page and put it online", "deploy this to a live URL", "host this app", "spin up a server", "create a project", "run this script remotely", "provision some compute", or "delegate this task to a server agent".
 ---
 
-<!--
-  GENERATED FILE. Do not edit by hand.
-
-  The tool reference below is rendered from the same table the MCP endpoint
-  advertises, so the two cannot drift. To change it, edit lib/mcp/tools.ts (the
-  tools) or lib/mcp/skill-doc.ts (the prose and the grouping), then run:
-
-      npm run skill:generate
-
-  tests/skill-doc.test.ts fails when this file is out of date.
--->
-
 Use Server4Agent's MCP tools (the `server4agent` MCP server) to build and host
 web pages, sites and apps at a live URL, provision servers, manage projects, and
 delegate work to an agent that runs on the box.

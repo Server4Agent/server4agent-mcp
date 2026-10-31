@@ -75,9 +75,9 @@ Setup for more apps: https://www.server4agent.com/integrations
 
 Ask in plain language. For example:
 
-- "Make a landing page for my bakery and put it online."
-- "Build an API that turns a CSV upload into JSON, and give me the URL."
-- "Check our website every hour and keep a log of when it is down."
+- "Write a landing page for my bakery and deploy it to a live URL."
+- "Write a small API that turns a CSV upload into JSON, run it on my server and give me the URL."
+- "Write a script that checks our website every hour, run it on my server on a schedule, and log when it is down."
 - "What is running on my servers, and how much have I spent this month?"
 
 How it fits together:
