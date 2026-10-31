@@ -5,7 +5,7 @@
   each release of its registry listing. Changes made here are overwritten.
 -->
 
-Servers your AI assistant builds on. It writes the code, runs it and ships each app to a live URL.
+MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.
 
 Server4Agent is a remote MCP server. Connect it to your AI assistant and ask
 for a web page, a site, an app, an API, a bot or a scheduled job. The assistant

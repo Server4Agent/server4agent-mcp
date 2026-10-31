@@ -1,7 +1,7 @@
 {
   "name": "server4agent",
   "displayName": "Server4Agent",
-  "description": "Servers your AI assistant builds on. It writes the code, runs it and ships each app to a live URL.",
+  "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.",
   "author": {
     "name": "Server4Agent",
     "url": "https://www.server4agent.com"
