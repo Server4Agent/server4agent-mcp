@@ -1,0 +1,10 @@
+{
+  "name": "server4agent",
+  "version": "1.0.9+b55a1544",
+  "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.",
+  "mcpServers": {
+    "server4agent": {
+      "httpUrl": "https://mcp.server4agent.com"
+    }
+  }
+}
