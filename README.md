@@ -95,7 +95,7 @@ How it fits together:
 
 ## Tools
 
-34 tools. `[read-only]` never writes; `[destructive]` may delete or
+37 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite.
 
 ### Servers
@@ -161,6 +161,14 @@ Put a running project online with deploy, or, when the user asks for one, start 
 - `start_build` `[destructive]`: Have the on-server agent build a web page, site, app or API from a plain-language goal.
 - `get_build` `[read-only]`: Get a build's status.
 - `deploy`: Deploy a project to its live public URL at &lt;slug&gt;.apps.server4agent.com: the last step in putting a web page, site, app or API online.
+
+### Custom domains
+
+Serve a public project at a domain the user owns, with HTTPS issued automatically. On paid plans. The user adds two DNS records; check_domain switches the domain on once both are found.
+
+- `add_domain`: Connect a custom domain the user owns to a project, so the app also answers at that address over HTTPS.
+- `check_domain`: Look up a custom domain's DNS records now and, when both are right, switch it on: the certificate is issued automatically and the domain starts serving within a few minutes.
+- `remove_domain` `[destructive]`: Disconnect a custom domain from a project.
 
 Every tool's arguments, with worked examples, are in the Agent Skill at
 https://www.server4agent.com/skill.md, and in each tool's JSON schema once you

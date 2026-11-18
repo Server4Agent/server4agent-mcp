@@ -55,7 +55,7 @@ needs the connection above. Reference: https://www.server4agent.com/docs/pages
 
 ## Tools
 
-34 tools. `[read-only]` never writes; `[destructive]` may delete or
+37 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite, so confirm with the user before calling one.
 
 ### Servers
@@ -155,6 +155,17 @@ Put a running project online with deploy, or, when the user asks for one, start 
   Get a build's status. The steps move together: running while the run works, done when it finished, failed when it did not (status still reads completed, and error says why). url is the project's address once it is built and public. run_id is the run doing the work: get_run shows its live progress, and when run_status is awaiting_input, answer its question with prompt and follow_up_of set to that run_id.
 - `deploy(server_id, project_id?)`
   Deploy a project to its live public URL at <slug>.apps.server4agent.com: the last step in putting a web page, site, app or API online. Checks that something in the project is listening on its `listen_port`, makes the project public, and checks its URL answers, then returns that URL with status live (or publishing, when it is public but has not answered yet). It builds and starts nothing: when nothing is listening it refuses and leaves the project as it was, so start the app first with start_app (after write_file, for code you write yourself), or have the on-server agent build and start it with start_build or prompt. Pass project_id; a server with exactly one project deploys that one without it.
+
+### Custom domains
+
+Serve a public project at a domain the user owns, with HTTPS issued automatically. On paid plans. The user adds two DNS records; check_domain switches the domain on once both are found.
+
+- `add_domain(project_id, domain)`
+  Connect a custom domain the user owns to a project, so the app also answers at that address over HTTPS. Returns the two DNS records the user adds at their DNS provider: a CNAME that points the domain at the project's address, and a TXT record that proves they own it. Nothing is served on the domain until check_domain finds both. Custom domains are on paid plans; the allowance is counted across the account. The project still has to be public (deploy) for the domain to serve.
+- `check_domain(project_id, domain)`
+  Look up a custom domain's DNS records now and, when both are right, switch it on: the certificate is issued automatically and the domain starts serving within a few minutes. Returns the domain's status (pending, verified, active or cert_failed) and, while pending, what is still wrong with the records. DNS changes can take a while to spread, so a pending result is normal right after adding the records; call it again later.
+- `remove_domain(project_id, domain)` `[destructive]`
+  Disconnect a custom domain from a project. It stops serving and its certificate is removed; the project keeps its own address. The DNS records stay at the user's DNS provider until they delete them.
 
 ## Common workflows
 
