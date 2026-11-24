@@ -26,6 +26,15 @@ Registry.
 
 You need a Server4Agent account: https://www.server4agent.com
 
+### ChatGPT
+
+Server4Agent is in ChatGPT's plugin directory: https://chatgpt.com/plugins/plugin_asdk_app_6aff651f1d40819191574b4c4fcdb306
+
+Add it there, or open Plugins in ChatGPT and search for Server4Agent, then
+sign in with your Server4Agent account. There is no developer mode to turn
+on and no API key to copy. In a new chat, type `@`, pick Server4Agent and
+ask for what you want built. Step by step: https://www.server4agent.com/integrations/chatgpt
+
 ### VS Code and GitHub Copilot
 
 Install Server4Agent from the MCP server gallery in the Extensions view
