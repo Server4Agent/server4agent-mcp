@@ -2,7 +2,7 @@
   "name": "server4agent",
   "displayName": "Server4Agent",
   "version": "1.0.9+150793f8",
-  "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.",
+  "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running.",
   "author": {
     "name": "Server4Agent",
     "url": "https://www.server4agent.com"

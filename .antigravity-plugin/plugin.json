@@ -3,7 +3,7 @@
   "displayName": "Server4Agent",
   "version": "1.0.9+150793f8",
   "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running.",
-  "logo": "logo.svg",
+  "logo": "logo.png",
   "suggestedPrompts": [
     "Write a landing page for my bakery and deploy it to a live URL.",
     "Write a small API that turns a CSV upload into JSON, run it on my server and give me the URL.",

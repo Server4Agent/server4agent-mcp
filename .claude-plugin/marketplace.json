@@ -1,6 +1,6 @@
 {
   "name": "server4agent",
-  "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.",
+  "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running.",
   "owner": {
     "name": "Server4Agent",
     "url": "https://www.server4agent.com"
@@ -9,7 +9,7 @@
     {
       "name": "server4agent",
       "source": "./",
-      "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL."
+      "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running."
     }
   ]
 }
