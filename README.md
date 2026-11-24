@@ -104,7 +104,7 @@ How it fits together:
 
 ## Tools
 
-37 tools. `[read-only]` never writes; `[destructive]` may delete or
+41 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite.
 
 ### Servers
@@ -178,6 +178,15 @@ Serve a public project at a domain the user owns, with HTTPS issued automaticall
 - `add_domain`: Connect a custom domain the user owns to a project, so the app also answers at that address over HTTPS.
 - `check_domain`: Look up a custom domain's DNS records now and, when both are right, switch it on: the certificate is issued automatically and the domain starts serving within a few minutes.
 - `remove_domain` `[destructive]`: Disconnect a custom domain from a project.
+
+### Managed agents
+
+Run the tools of a hosted agent platform's sessions inside a project instead of the platform's sandbox. The server sleeps between sessions and wakes for each one.
+
+- `connect_agent_environment`: Connect a hosted agent platform's self-hosted environment to a project, so that platform's agent sessions run their tools (shell, files, code) inside the project's folder on this server instead of in the platform's own sandbox.
+- `list_agent_environments` `[read-only]`: List the agent environments connected to a project, with each one's status: connecting, ready (waiting for a session), running (a session is working in the project), paused (the project or server is paused) or error, with the problem in words.
+- `agent_session` `[destructive]`: Start or stop the executor for one hosted agent session in a project, for a platform whose sessions each bring their own environment.
+- `disconnect_agent_environment` `[destructive]`: Disconnect an agent environment from a project.
 
 Every tool's arguments, with worked examples, are in the Agent Skill at
 https://www.server4agent.com/skill.md, and in each tool's JSON schema once you
