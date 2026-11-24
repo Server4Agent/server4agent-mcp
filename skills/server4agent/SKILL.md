@@ -1,6 +1,6 @@
 ---
 name: server4agent
-description: Build and host web pages, sites, apps, APIs, bots and scheduled jobs at a live URL on a persistent server that keeps them running after the conversation ends. Use when the user asks to put something online, publish or share a page, deploy to a live URL, host an app or API, keep a bot running, run a script on a schedule, or delegate building to an on-server agent. Works through the Server4Agent MCP tools, or over HTTP with an API key; a static page can be published without an account.
+description: Build and host web pages, sites, apps, APIs, bots and scheduled jobs at a live URL on a persistent server that keeps them running after the conversation ends. Use when the user asks to put something online, publish or share a page, deploy to a live URL, host an app or API, keep a bot running, run a script on a schedule, or delegate building to an on-server agent. Works through the Server4Agent MCP tools, or over HTTP with an API key.
 when_to_use: Triggers on requests like "make a page and put it online", "deploy this to a live URL", "host this app", "spin up a server", "create a project", "run this script remotely", "provision some compute", or "delegate this task to a server agent".
 ---
 
@@ -35,24 +35,6 @@ adds it to their MCP host's own settings as an `Authorization: Bearer`
 header. The steps for each host are at https://www.server4agent.com/docs/mcp.
 Leave the key to them: never ask for it in the conversation, and never write it
 into a file.
-
-**No connection and no key yet?** A static page can still go online, with no
-account, in one HTTP call. It is live at once for a day, and the response
-carries a `claim_url` for the person you are working for: give it to them
-exactly as returned (never post it publicly). Claiming it, within three days,
-creates their account and keeps the page on a server of their own. Static files only, up to 200
-files, 512 KB each, 4 MB in total.
-
-```http
-POST https://api.server4agent.com/pages
-Content-Type: text/html
-
-<!doctype html><title>Hello</title><h1>Hello</h1>
-```
-
-Several files go as JSON, `{"files": [{"path": "index.html", "content": "..."}]}`,
-with `"encoding": "base64"` for binary files. Anything that has to run code
-needs the connection above. Reference: https://www.server4agent.com/docs/pages
 
 ## Tools
 

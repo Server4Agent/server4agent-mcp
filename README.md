@@ -185,15 +185,11 @@ are connected.
 
 ## Where your data goes
 
-Your assistant sends data to two Server4Agent endpoints, and to no other
-service:
-
-- **`https://mcp.server4agent.com`**, the MCP server this plugin connects. It receives every
-  tool call and its arguments: the files, commands, prompts and secret values
-  your assistant sends.
-- **`https://api.server4agent.com/pages`**, which the skill uses only when no connection is
-  set up, to publish a static page without an account. It receives that page's
-  files.
+Your assistant sends data to one Server4Agent endpoint, and to no other
+service: **`https://mcp.server4agent.com`**, the MCP server this plugin connects. It receives
+every tool call and its arguments: the files, commands, prompts and secret
+values your assistant sends. Every call is made as your own Server4Agent
+account.
 
 The skill also links to pages on https://www.server4agent.com for reference. Nothing is sent there.
 
@@ -201,8 +197,6 @@ How long it is kept:
 
 - Files, apps and secrets on a server stay until you delete them, or the server
   they are on.
-- A page published without an account is public for a day and can be claimed
-  for three. If nobody claims it, its files are deleted after that.
 - Account data is kept while the account is open, and for up to 90 days after
   it closes. Server logs are kept for 30 days.
 
