@@ -58,61 +58,63 @@ needs the connection above. Reference: https://www.server4agent.com/docs/pages
 
 37 tools. `[read-only]` never writes; `[destructive]` may delete or
 overwrite, so confirm with the user before calling one.
+Each line is the tool's first sentence. Its full description and arguments
+come with the tool from the MCP server.
 
 ### Servers
 
 A server is a sized compute box. Projects live inside it and share its resources.
 
 - `create_server(task?, tier?, kind?, region?, project_sharing?, secrets?)`
-  Provision a sized server box. Servers hold projects; each project gets a stable URL that serves once you make it public. One server holds several projects, so check list_servers for one with room before creating another. Pass `secrets` to set server-wide env vars (shared by every project on the server); values are write-only. Pass `kind: "browser"` for a box with a screen and a browser on it. Returns the server id. A new server takes about a minute to start: poll get_server until provisioning reads ready before writing files or starting apps.
+  Provision a sized server box.
 - `list_servers()` `[read-only]`
-  List your servers with their tier, kind, status, project sharing, and current project count. kind is standard for a headless box or browser for one with a screen and a browser on it.
+  List your servers with their tier, kind, status, project sharing, and current project count.
 - `get_server(server_id)` `[read-only]`
-  Get a server's tier, kind, status, capacity, project count, and project sharing. kind is standard for a headless box or browser for one with a screen and a browser on it.
+  Get a server's tier, kind, status, capacity, project count, and project sharing.
 - `update_server(server_id, task?, region?, project_sharing?)` `[destructive]`
   Update a server's nickname, region, or how much its projects may see of each other.
 - `control_server(server_id, action)` `[destructive]`
-  Pause a server (stop), resume it (start), or reboot it (restart). A paused server stays down until it is started again: its projects are offline, it does not bill, and tools that reach it (prompt, exec, start_app, the file tools, start_build) answer that it is paused instead of waking it.
+  Pause a server (stop), resume it (start), or reboot it (restart).
 - `delete_server(server_id)` `[destructive]`
   Tear down a server and every project on it.
 - `get_usage()` `[read-only]`
-  Get the account's AI spend and budget: how much has been spent this billing period, the plan's included credits, any budget cap, and whether new tasks are blocked (with the reason). Call this before a long series of prompts to check remaining budget, since dispatch fails once a spend ceiling is reached. Only agent runs stop: write_file, exec, start_app and deploy keep working, so the code can still be written and run by hand.
+  Get the account's AI spend and budget: how much has been spent this billing period, the plan's included credits, any budget cap, and whether new tasks are blocked (with the reason).
 
 ### Projects
 
 A project is a workspace plus an app inside a server, with its own slug and URL. New projects are private: the URL only serves once you make it public.
 
 - `list_templates()` `[read-only]`
-  List the available project starters. Each template has an id, a human label, a one-line description, default visibility/lifecycle, and a source_kind. The first entries are import templates (source_kind "git" or "archive") that seed a project from your own code; the rest are ordinary starters (source_kind null). Pass the id as `template` to create_project to pre-pick sensible defaults for that use case.
+  List the available project starters.
 - `create_project(server_id, name?, description?, visibility?, access?, access_password?, lifecycle?, template?, source?, secrets?)`
-  Create a project on a server: the home for one web page, site, app, API or bot, with its own URL at <slug>.apps.server4agent.com. Projects default to private; set visibility to "public" to expose that URL. Use lifecycle="ephemeral" for one-shot work that should be cleaned up when done (call cleanup_project after); default is "persistent" for long-lived monitors / dashboards / tools. Pass `template` (see list_templates) to apply a starter's defaults, or a `source` to seed the workspace from your own code (kind git/archive); name is derived from the repo/archive when omitted. Pass `secrets` to set project-scoped env vars at creation (values are write-only). Explicit fields override the template. Fails if the server is at its tier's project cap. Returns `listen_port`, the port inside the box that this project's URL is routed to: a project serves only while a process is listening there, so bind that rather than a port of your own choosing.
+  Create a project on a server: the home for one web page, site, app, API or bot, with its own URL at <slug>.apps.server4agent.com.
 - `list_projects(server_id?)` `[read-only]`
-  List projects. Optionally filter by server_id to see what's already on a particular server before creating a new one.
+  List projects.
 - `get_project(project_id)` `[read-only]`
-  Get a single project: name, slug, description, public URL, listen port, run plan, timestamps. listen_port is the port inside the box that this project's URL is routed to, so an app here binds that rather than a port of its own choosing, and has to be running for the URL to answer. listen_port is null on a project created before the field existed, and on a box old enough to predate the in-pod proxy the published port (8080) is reached directly instead, so treat those two as the fallback when an app that binds listen_port still cannot be reached. url_status covers only whether the address and its certificate are ready, so it reads "active" for a public project with nothing listening; it is not a health check. run_plan is how bring-up installs and starts it, or null if no plan has been settled yet; a run_plan whose port is null means the project isn't a server.
+  Get a single project: name, slug, description, public URL, listen port, run plan, timestamps.
 - `update_project(project_id, name?, description?, visibility?, access?, access_password?, lifecycle?, run_plan?)` `[destructive]`
-  Rename a project, update its description, change visibility, link access or lifecycle, or correct its run plan. The slug + URL stay the same. Setting run_plan only records how the project should be brought up; call init_project when you want it rebuilt.
+  Rename a project, update its description, change visibility, link access or lifecycle, or correct its run plan.
 - `init_project(project_id, proceed?)` `[destructive]`
-  Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds. Returns a run_id to poll with get_run. Set proceed to true to continue past still-missing optional secrets. Not for a project whose files you wrote yourself: start that one with start_app.
+  Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds.
 - `export_project(project_id, ttl_seconds?)`
-  Package a project into a portable bundle and return a time-limited download link. The bundle carries the project's source tree, its settings, its run plan, and the NAMES of the env vars it needs. Left out: dependency caches, git history, and any .env or credential file in the workspace, so the bundle never carries a secret value. Hand the file to import_project on this deployment or any other Server4Agent deployment to recreate the project there.
+  Package a project into a portable bundle and return a time-limited download link.
 - `import_project(server_id, bundle, name?)`
-  Recreate a project on a server from a bundle that export_project produced, here or on another Server4Agent deployment. Pass the bundle base64 encoded in `bundle`; large bundles are better uploaded from the dashboard, since the request body has a size limit. The new project is always private, gets its own slug and URL, and starts bringing itself up right away (the bundle only reaches the server as part of that run). Env vars the bundle names are bound only where this account already holds a value, and no .env file travels: the result lists what is still missing in `missing_env`, and the app will not run until you set those with set_secret.
+  Recreate a project on a server from a bundle that export_project produced, here or on another Server4Agent deployment.
 - `cleanup_project(project_id)` `[destructive]`
-  Clean up an ephemeral project once its task is done. Deletes the workspace, retires the slug, and frees the project slot. Errors on persistent projects; use delete_project for those.
+  Clean up an ephemeral project once its task is done.
 - `delete_project(project_id)` `[destructive]`
-  Delete a project. The public URL stops working immediately.
+  Delete a project.
 
 ### Secrets
 
 Env vars for servers and projects. Values are write-only: no tool ever reads one back.
 
 - `set_secret(key, value, description?)` `[destructive]`
-  Create or update a secret (an env var, key → value) on the account. One secret per key; setting an existing key updates its value. Values are write-only: never returned by any tool. Use attach_secret to bind it to a server or project.
+  Create or update a secret (an env var, key → value) on the account.
 - `list_secrets()` `[read-only]`
-  List the account's secrets: keys, notes, and where each is bound (servers/projects). Never returns values; only a masked hint.
+  List the account's secrets: keys, notes, and where each is bound (servers/projects).
 - `attach_secret(key, value?, server_id, project_id?)` `[destructive]`
-  Bind a secret to a scope so runs there see it as an env var. Server-wide when only server_id is given; project-scoped when project_id is also given. Pass value to set-and-bind in one call; omit it to bind an existing secret by key. A key has one value on the account, shared everywhere it is bound: passing value here changes it for every server and project that key is bound to. Give a project that needs its own value a key of its own.
+  Bind a secret to a scope so runs there see it as an env var.
 - `delete_secret(secret_id)` `[destructive]`
   Delete a secret and all of its bindings.
 
@@ -121,52 +123,52 @@ Env vars for servers and projects. Values are write-only: no tool ever reads one
 Start and keep your app running, drive the shell yourself, or, when the user asks for it, hand work to the agent running on the server.
 
 - `start_app(project_id, command, name?)` `[destructive]`
-  Start a project's app and keep it running: the step that puts a project online after its files are written. Runs `command` in the project folder as a background process with PORT set to the project's routed port (the app must listen on PORT), records it so it comes back after a restart, and waits up to about 10 seconds for the port to answer. Calling it again with the same name restarts it, which is how you pick up changed code. Returns whether the app is answering, its log tail, and the URL. A project's URL serves only while its visibility is public, so set that with update_project when the app should be reachable. For static files, put them under public/ and serve that folder, e.g. "python3 -m http.server $PORT --bind 0.0.0.0 --directory public". Never serve the project folder itself, which holds the project's secrets in .server4agent/env.
+  Start a project's app and keep it running: the step that puts a project online after its files are written.
 - `prompt(server_id, prompt, project_id?, follow_up_of?)` `[destructive]`
-  Send a freeform prompt to the on-server agent. It plans, writes code, runs commands, and ships whatever the prompt asks for. It spends the account's AI budget, so use it when the user asks for the on-server agent or to continue a run it started; to build something yourself, write_file, exec, start_app and deploy cost nothing. Returns a run_id to poll with get_run. Each call starts a new conversation unless you pass follow_up_of: the run_id of an earlier run to continue, so the agent remembers what it did there. Use it to answer a run that is awaiting_input, or to ask for changes to what a run built. Pass project_id to work inside one project's workspace, or omit it to work across the whole server workspace (e.g. scaffolding a new project).
+  Send a freeform prompt to the on-server agent.
 - `exec(server_id, command, project_id?)` `[destructive]`
-  Run a shell command on the server and return its output. Pass project_id to run inside that project's workspace folder, with PORT set to the project's routed port; omit it to run at the server workspace root. For one-off work: installing dependencies, building, inspecting files. Runs as the workspace user, the same one the agent and the apps run as, so what it creates stays editable by both; prefix a command with sudo when it needs root. A project command also gets the project's secrets as env. The command's session ends with the call, so do not use it to start an app or any other long-running process: use start_app, which keeps it running, brings it back after a restart, and tells you whether it answered. Output comes back for about 20 seconds: a command that runs longer keeps going on the server, but its output does not return, and the server's other commands wait for it. Start long work (a big install, a long build) in the background with its output in a file, then read the file.
+  Run a shell command on the server and return its output.
 - `get_run(server_id, run_id)` `[read-only]`
-  Get a run's status, its latest progress note, the agent's final response, and what it changed in the workspace (commit, branch, files). Poll this with the run_id returned by prompt or init_project.
+  Get a run's status, its latest progress note, the agent's final response, and what it changed in the workspace (commit, branch, files).
 - `get_logs(server_id, project_id?, lines?)` `[read-only]`
-  Read the latest log tails from a server: one entry per log file that a project's processes have written (each long-running process appends to .server4agent/<name>.log in its project folder). Read live from the server at the moment you call. If the server does not answer in time (starting, restarting, or paused), you get the tails saved earlier with stale: true and a note saying how old they are. An app keeps the same log file across restarts. Pass project_id to get only that project's logs. Use this to debug a crashing app or check what a background process is doing.
+  Read the latest log tails from a server: one entry per log file that a project's processes have written (each long-running process appends to .server4agent/<name>.log in its project folder).
 
 ### File workspace
 
 Read and write the project's files directly when you do not need the agent.
 
 - `list_files(server_id, project_id?)` `[read-only]`
-  List paths in the server's workspace. Pass project_id to list only that project's folder (paths come back relative to the project); omit it to list the whole server workspace.
+  List paths in the server's workspace.
 - `read_file(server_id, path, project_id?, encoding?)` `[read-only]`
-  Read a file from the server's workspace. With project_id, path is resolved inside that project's folder; without it, path is relative to the server workspace root. Use encoding:"base64" for binary files (e.g. .xlsx, images); plain text mode will corrupt non-text bytes.
+  Read a file from the server's workspace.
 - `write_file(server_id, path, content, project_id?, encoding?)` `[destructive]`
-  Write or overwrite a file in the server's workspace. With project_id, path is resolved inside that project's folder; without it, path is relative to the server workspace root. Use encoding:"base64" to write binary content (e.g. a generated .xlsx); plain text mode assumes UTF-8 and will corrupt binary bytes. One call carries up to 512 KB of content; write anything larger in pieces, or fetch it on the server with exec. Writing a file does not serve it: a project's URL is answered by a running app, so after writing the files call start_app (a changed server needs start_app again to pick the change up).
+  Write or overwrite a file in the server's workspace.
 - `delete_file(server_id, path, project_id?)` `[destructive]`
-  Delete a file from the server's workspace. With project_id, path is resolved inside that project's folder; without it, path is relative to the server workspace root.
+  Delete a file from the server's workspace.
 - `get_download_url(server_id, path, project_id?, ttl_seconds?)`
-  Mint a time-limited link to download one file from the server's workspace, e.g. after generating a report or converting a file, hand this URL back to the user instead of the raw content. With project_id, path is resolved inside that project's folder. The link needs no login and works for anyone who has it, so only mint it for files that are OK to share.
+  Mint a time-limited link to download one file from the server's workspace, e.g. after generating a report or converting a file, hand this URL back to the user instead of the raw content.
 
 ### Build and deploy
 
 Put a running project online with deploy, or, when the user asks for one, start an agent run that builds from a goal.
 
 - `start_build(server_id, goal, project_id?)` `[destructive]`
-  Have the on-server agent build a web page, site, app or API from a plain-language goal. Use it only when the user asks for that agent: it counts against the AI budget like prompt, and you can write the code yourself with write_file, exec and start_app, then deploy. Starts an agent run that works through each stage in order: plan, scaffold, write the code, install, build and test, then start it on the project's port. Returns a build_id to poll with get_build, and the run_id of the run doing the work. Pass project_id to build inside that project's workspace folder, then deploy it to put the result online; omit project_id to build at the server workspace root.
+  Have the on-server agent build a web page, site, app or API from a plain-language goal.
 - `get_build(server_id, build_id)` `[read-only]`
-  Get a build's status. The steps move together: running while the run works, done when it finished, failed when it did not (status still reads completed, and error says why). url is the project's address once it is built and public. run_id is the run doing the work: get_run shows its live progress, and when run_status is awaiting_input, answer its question with prompt and follow_up_of set to that run_id.
+  Get a build's status.
 - `deploy(server_id, project_id?)`
-  Deploy a project to its live public URL at <slug>.apps.server4agent.com: the last step in putting a web page, site, app or API online. Checks that something in the project is listening on its `listen_port`, makes the project public, and checks its URL answers, then returns that URL with status live (or publishing, when it is public but has not answered yet). It builds and starts nothing: when nothing is listening it refuses and leaves the project as it was, so start the app first with start_app (after write_file, for code you write yourself), or have the on-server agent build and start it with start_build or prompt. Pass project_id; a server with exactly one project deploys that one without it.
+  Deploy a project to its live public URL at <slug>.apps.server4agent.com: the last step in putting a web page, site, app or API online.
 
 ### Custom domains
 
 Serve a public project at a domain the user owns, with HTTPS issued automatically. On paid plans. The user adds two DNS records; check_domain switches the domain on once both are found.
 
 - `add_domain(project_id, domain)`
-  Connect a custom domain the user owns to a project, so the app also answers at that address over HTTPS. Returns the two DNS records the user adds at their DNS provider: a CNAME that points the domain at the project's address, and a TXT record that proves they own it. Nothing is served on the domain until check_domain finds both. Custom domains are on paid plans; the allowance is counted across the account. The project still has to be public (deploy) for the domain to serve.
+  Connect a custom domain the user owns to a project, so the app also answers at that address over HTTPS.
 - `check_domain(project_id, domain)`
-  Look up a custom domain's DNS records now and, when both are right, switch it on: the certificate is issued automatically and the domain starts serving within a few minutes. Returns the domain's status (pending, verified, active or cert_failed) and, while pending, what is still wrong with the records. DNS changes can take a while to spread, so a pending result is normal right after adding the records; call it again later.
+  Look up a custom domain's DNS records now and, when both are right, switch it on: the certificate is issued automatically and the domain starts serving within a few minutes.
 - `remove_domain(project_id, domain)` `[destructive]`
-  Disconnect a custom domain from a project. It stops serving and its certificate is removed; the project keeps its own address. The DNS records stay at the user's DNS provider until they delete them.
+  Disconnect a custom domain from a project.
 
 ## Common workflows
 

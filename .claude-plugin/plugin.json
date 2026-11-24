@@ -1,7 +1,7 @@
 {
   "name": "server4agent",
   "displayName": "Server4Agent",
-  "version": "1.0.9+e8939907",
+  "version": "1.0.9+8bf2a5ce",
   "description": "MCP server that lets your AI assistant build and deploy apps, hosting each one at a live URL.",
   "author": {
     "name": "Server4Agent",
@@ -23,5 +23,11 @@
   "documentationUrl": "https://www.server4agent.com/docs/mcp",
   "supportUrl": "https://www.server4agent.com/contact",
   "privacyPolicyUrl": "https://www.server4agent.com/privacy",
-  "termsOfServiceUrl": "https://www.server4agent.com/terms"
+  "termsOfServiceUrl": "https://www.server4agent.com/terms",
+  "mcpServers": {
+    "server4agent": {
+      "type": "http",
+      "url": "https://mcp.server4agent.com"
+    }
+  }
 }
