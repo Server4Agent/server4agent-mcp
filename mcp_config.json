@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "server4agent": {
+      "serverUrl": "https://mcp.server4agent.com"
+    }
+  }
+}

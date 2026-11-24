@@ -11,9 +11,10 @@ build for you, when the user asks for it.
 
 ## One-time setup
 
-Check whether the connection already exists by looking for tools prefixed
-`mcp__server4agent__` (for example `mcp__server4agent__create_server`). If they
-are there, skip this section.
+Check whether the connection already exists by looking for Server4Agent's
+tools, such as `create_server` and `deploy`. Hosts prefix their names (for
+example `mcp__server4agent__create_server`), and a plugin that bundles the
+server has them from the start. If they are there, skip this section.
 
 If they are not, connect the MCP server at `https://mcp.server4agent.com`.
 There are two ways in, and the first is better:

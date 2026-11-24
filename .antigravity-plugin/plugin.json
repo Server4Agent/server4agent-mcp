@@ -1,0 +1,29 @@
+{
+  "name": "server4agent",
+  "displayName": "Server4Agent",
+  "version": "1.0.9+e8939907",
+  "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running.",
+  "logo": "logo.svg",
+  "suggestedPrompts": [
+    "Write a landing page for my bakery and deploy it to a live URL.",
+    "Write a small API that turns a CSV upload into JSON, run it on my server and give me the URL.",
+    "Write a script that checks our website every hour, run it on my server on a schedule, and log when it is down."
+  ],
+  "author": {
+    "name": "Server4Agent",
+    "email": "hello@server4agent.com",
+    "url": "https://www.server4agent.com"
+  },
+  "homepage": "https://www.server4agent.com/docs/mcp",
+  "repository": "https://github.com/Server4Agent/server4agent-mcp",
+  "license": "MIT",
+  "keywords": [
+    "hosting",
+    "deploy",
+    "mcp",
+    "server",
+    "websites",
+    "bots",
+    "automation"
+  ]
+}
