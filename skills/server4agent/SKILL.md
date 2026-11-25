@@ -80,7 +80,7 @@ A project is a workspace plus an app inside a server, with its own slug and URL.
   Start or resume bring-up for a project seeded from a git/archive source: the on-server agent installs dependencies, starts the app, and confirms it responds.
 - `export_project(project_id, ttl_seconds?)`
   Package a project into a portable bundle and return a time-limited download link.
-- `import_project(server_id, bundle, name?)`
+- `import_project(server_id, bundle?, bundle_url?, name?)`
   Recreate a project on a server from a bundle that export_project produced, here or on another Server4Agent deployment.
 - `cleanup_project(project_id)` `[destructive]`
   Clean up an ephemeral project once its task is done.

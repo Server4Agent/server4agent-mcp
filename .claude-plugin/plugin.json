@@ -1,7 +1,7 @@
 {
   "name": "server4agent",
   "displayName": "Server4Agent",
-  "version": "1.0.9+7523f78c",
+  "version": "1.0.9+8196176c",
   "description": "Publish the apps your AI builds. Web pages, sites, APIs, bots and scheduled jobs go live at their own URL on a server that keeps them running.",
   "author": {
     "name": "Server4Agent",
