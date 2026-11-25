@@ -114,7 +114,7 @@ A server is a sized compute box. Projects live inside it and share its resources
 - `create_server`: Provision a sized server box.
 - `list_servers` `[read-only]`: List your servers with their tier, kind, status, project sharing, and current project count.
 - `get_server` `[read-only]`: Get a server's tier, kind, status, capacity, project count, and project sharing.
-- `update_server` `[destructive]`: Update a server's nickname, region, or how much its projects may see of each other.
+- `update_server` `[destructive]`: Update a server's nickname, or how much its projects may see of each other.
 - `control_server` `[destructive]`: Pause a server (stop), resume it (start), or reboot it (restart).
 - `delete_server` `[destructive]`: Tear down a server and every project on it.
 - `get_usage` `[read-only]`: Get the account's AI spend and budget: how much has been spent this billing period, the plan's included credits, any budget cap, and whether new tasks are blocked (with the reason).

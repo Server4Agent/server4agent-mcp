@@ -54,7 +54,7 @@ A server is a sized compute box. Projects live inside it and share its resources
 - `get_server(server_id)` `[read-only]`
   Get a server's tier, kind, status, capacity, project count, and project sharing.
 - `update_server(server_id, task?, region?, project_sharing?)` `[destructive]`
-  Update a server's nickname, region, or how much its projects may see of each other.
+  Update a server's nickname, or how much its projects may see of each other.
 - `control_server(server_id, action)` `[destructive]`
   Pause a server (stop), resume it (start), or reboot it (restart).
 - `delete_server(server_id)` `[destructive]`
